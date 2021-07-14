@@ -1,0 +1,80 @@
+auth:
+  rootPassword: "root"
+  database: "test-db"
+  username: "local"
+  password: "1234567890"
+  replicationPassword: "password"
+
+primary:
+  podAnnotations:
+    sidecar.istio.io/inject: "true"
+  podSecurityContext:
+    enabled: false
+  containerSecurityContext:
+    enabled: false
+  initContainers:
+  - command:
+    - /bin/bash
+    - -ec
+    - |
+      chown -R 1001:1001 /bitnami/mysql
+      chown root:root /opt/bitnami/mysql/tmp
+      chmod o-w /opt/bitnami/mysql/tmp
+    image: bitnami/minideb:buster
+    imagePullPolicy: IfNotPresent
+    name: volume-permissions
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    securityContext:
+      capabilities:
+        drop:
+        - NET_RAW
+      runAsUser: 0
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /bitnami/mysql
+      name: data
+    - mountPath: /opt/bitnami/mysql/tmp
+      name: tmp
+  extraVolumes:
+  - emptyDir:
+      medium: Memory
+    name: tmp
+  configuration: |-
+    [mysqld]
+    default_authentication_plugin=mysql_native_password
+    skip-name-resolve
+    explicit_defaults_for_timestamp
+    basedir=/opt/bitnami/mysql
+    plugin_dir=/opt/bitnami/mysql/lib/plugin
+    port=3306
+    socket=/opt/bitnami/mysql/tmp/mysql.sock
+    datadir=/bitnami/mysql/data
+    tmpdir=/opt/bitnami/mysql/tmp
+    max_allowed_packet=16M
+    bind-address=0.0.0.0
+    pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+    character-set-server=UTF8
+    collation-server=utf8_general_ci
+    [client]
+    port=3306
+    socket=/opt/bitnami/mysql/tmp/mysql.sock
+    default-character-set=UTF8
+    plugin_dir=/opt/bitnami/mysql/lib/plugin
+    [manager]
+    port=3306
+    socket=/opt/bitnami/mysql/tmp/mysql.sock
+    pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+
+persistence:
+  # This may need updating
+  storageClass: "default"
+
+secondary:
+  replicaCount: 0
