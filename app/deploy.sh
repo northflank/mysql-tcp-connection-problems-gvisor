@@ -5,6 +5,9 @@
 if [ "$1" == "" ]; then
   # Use a public image that was built by us
   IMAGE=deciderwill/php-sleep-gvisor-tcp-debug:latest
+else
+  # Otherwise use specified image
+  IMAGE=$1
 fi
 
 # Set mtls mode to strict before deploying the app

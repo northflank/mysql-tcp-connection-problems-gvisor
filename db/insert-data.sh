@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 # Create a pod that deploys the data to mysql
+# Creates table schema with fields id, shop and installed
+# Inserts 10000 entries into the above table
 kubectl apply -f - << EOF
 apiVersion: batch/v1
 kind: Job
